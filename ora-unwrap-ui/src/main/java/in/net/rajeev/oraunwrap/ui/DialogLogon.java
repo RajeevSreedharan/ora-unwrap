@@ -22,9 +22,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.sql.SQLException;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -32,6 +34,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 
@@ -225,16 +228,24 @@ public class DialogLogon extends JDialog {
 					}
 				});
 			}
-		}
-		tfUser.setText("C51PRODHST");
-		tfPassword.setText("C51PRODHST");
-		tfHost.setText("192.168.56.103");
-		tfPort.setText("1521");
-		tfService.setText("GRCU");
+		}	
 		
-
-		
+		addEscapeListener(this);
 	}
+	
+	public void addEscapeListener(final JDialog dialog) {
+	    ActionListener escListener = new ActionListener() {
+	        public void actionPerformed(ActionEvent e) {
+	            dialog.setVisible(false);
+	        }
+	    };
+
+	    dialog.getRootPane().registerKeyboardAction(escListener,
+	            KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+	            JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+	}
+	
 	private void connect(){
 		worker = new SwingWorker<Object, Void>() {
 		@Override
