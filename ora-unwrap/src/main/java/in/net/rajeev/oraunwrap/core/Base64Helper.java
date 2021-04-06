@@ -64,9 +64,9 @@ public class Base64Helper {
 	 * @param others
 	 * @throws IOException
 	 */
-	public static void decodeBase64(String[] splitSource, StringBuilder unwrapped, StringBuilder others)
+	public static void decodeBase64(String[] splitSource, StringBuilder unwrapped, StringBuilder others, int startLine)
 			throws IOException {
-		for (int i = 20; i < splitSource.length; i++) {
+		for (int i = startLine + 20; i < splitSource.length; i++) {
 			if (splitSource[i].length() < 4) {
 				others.append(splitSource[i]);
 				continue;
