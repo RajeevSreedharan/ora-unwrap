@@ -42,8 +42,8 @@ public class Unwrapper {
 			StringBuilder unwrapped = new StringBuilder();
 			StringBuilder others = new StringBuilder();
 			
-			verifyWrappedCode(splitSource);
-			Base64Helper.decodeBase64(splitSource, unwrapped, others);
+			int i = verifyWrappedCode(splitSource);
+			Base64Helper.decodeBase64(splitSource, unwrapped, others, i);
 			String transformed = Base64Helper.transform(unwrapped.toString().substring(40));
 			byte[] compressedBytes = DatatypeUtil.parseHexBinary(transformed);
 			String txtRet = inflate(compressedBytes);
@@ -61,11 +61,22 @@ public class Unwrapper {
 	 * 
 	 * @param splitSource
 	 */
-	protected void verifyWrappedCode(String[] splitSource) {
-		String firstLine = splitSource[0];
-		if (!firstLine.trim().endsWith("wrapped")) {
+	protected int verifyWrappedCode(String[] splitSource) {
+		String wrappedMetaDataLine = null;
+		int i = 0;
+		
+		for(String s : splitSource) {
+			if (s.trim().endsWith(" wrapped")) {
+				wrappedMetaDataLine = s;
+				break;
+			}
+			i++;
+		}
+		if (wrappedMetaDataLine == null) {
 			throw new RuntimeException(Messages.getString("UnWrapper.msg.notwrapped"));
 		}
+		
+		return i;
 	}
 
 	/**
