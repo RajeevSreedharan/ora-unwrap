@@ -16,7 +16,6 @@
 package in.net.rajeev.oraunwrap.ui;
 
 import java.awt.FlowLayout;
-
 /**
  * @author Rajeev Sreedharan
  *
@@ -26,17 +25,30 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.sql.SQLException;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import in.net.rajeev.oraunwrap.core.ConnectionObservable;
+import in.net.rajeev.oraunwrap.core.DBConnections;
 import in.net.rajeev.oraunwrap.core.Unwrapper;
+import in.net.rajeev.oraunwrap.ui.commands.OpenActionObservable;
 
 public class PnlTextUnwrap extends JPanel {
 
@@ -45,7 +57,8 @@ public class PnlTextUnwrap extends JPanel {
 	JTextArea txtOutput;
 	JButton btnUnwrap;
 	JButton btnClear;
-	
+
+	SwingWorker<String, Void> workerFileRead;
 	/**
 	 * Create the panel.
 	 */
@@ -151,6 +164,45 @@ public class PnlTextUnwrap extends JPanel {
 			public void insertUpdate(DocumentEvent de) {unwrap();}
 			public void changedUpdate(DocumentEvent de) {unwrap();}
 		});
+		
+		OpenActionObservable.getInstance().addObserver(new Observer() {
+			public void update(Observable o, Object arg) {
+				OpenActionObservable openActionObservable = (OpenActionObservable) o;
+				File selectedFile = openActionObservable.getSelectedFile();
+				readfile(selectedFile);
+			}
+		});
+	}
+	
+	private void readfile(final File selectedFile){
+		workerFileRead = new SwingWorker<String, Void>() {
+		@Override
+		public String doInBackground() {
+			String data = null;
+			try {
+				data = new String(Files.readAllBytes(Paths.get(selectedFile.getAbsolutePath())));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return data;
+		}
+		
+		@Override
+		public void done() {
+			try {
+				txtInput.setText((String) get());
+			} catch (InterruptedException e) {
+				txtInput.setText("");
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				txtInput.setText("");
+				e.printStackTrace();
+			}
+			workerFileRead = null;
+		}
+	};
+	
+	workerFileRead.execute();
 	}
 
 
