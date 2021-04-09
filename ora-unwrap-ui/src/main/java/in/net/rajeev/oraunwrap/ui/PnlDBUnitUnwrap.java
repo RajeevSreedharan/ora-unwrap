@@ -30,6 +30,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 import in.net.rajeev.oraunwrap.core.ConnectionObservable;
 import in.net.rajeev.oraunwrap.core.DBConnections;
@@ -223,11 +224,11 @@ public class PnlDBUnitUnwrap extends JPanel {
 				
 			}
 		});
-
+		treeUnits.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		treeUnits.addTreeSelectionListener(new TreeSelectionListener() {
 			public void valueChanged(TreeSelectionEvent e) {
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode) treeUnits.getLastSelectedPathComponent();
-				if (node == null)
+				if (node == null || node.getParent() == null)
 					return;
 				String name = (String) node.getUserObject();
 				String type = (String) ((DefaultMutableTreeNode)node.getParent()).getUserObject();
