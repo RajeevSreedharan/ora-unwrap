@@ -42,6 +42,7 @@ import in.net.rajeev.oraunwrap.core.ConnectionObservable;
 import in.net.rajeev.oraunwrap.ui.commands.ConnectAction;
 import in.net.rajeev.oraunwrap.ui.commands.OpenAction;
 import in.net.rajeev.oraunwrap.ui.commands.OpenActionObservable;
+import in.net.rajeev.oraunwrap.ui.commands.SaveAsAction;
 import in.net.rajeev.oraunwrap.ui.helpers.UnwrapperIconSet;
 
 /**
@@ -62,6 +63,7 @@ public class FrmUnwrapUI extends JFrame {
 	JMenuItem mntmHelpAbout;
 	JMenuItem mntmFileExit;
 	JMenuItem mntmFileOpen;
+	JMenuItem mntmFileSaveas;
 	/**
 	 * Launch the application.
 	 */
@@ -121,7 +123,7 @@ public class FrmUnwrapUI extends JFrame {
 		mntmFileOpen = new JMenuItem(MessagesUI.getString("FrmUnwrapUI.openmenu"));
 		mnFileMenu.add(mntmFileOpen);
 
-		JMenuItem mntmFileSaveas = new JMenuItem(MessagesUI.getString("FrmUnwrapUI.saveasmenu"));
+		mntmFileSaveas = new JMenuItem(MessagesUI.getString("FrmUnwrapUI.saveasmenu"));
 		mnFileMenu.add(mntmFileSaveas);
 
 		mntmFileConnect = new JMenuItem(MessagesUI.getString("FrmUnwrapUI.connectaction"));
@@ -217,6 +219,8 @@ public class FrmUnwrapUI extends JFrame {
 				tabbedPane.setSelectedComponent(pnlTextUnwrap);
 			}
 		});
+		
+		mntmFileSaveas.addActionListener(SaveAsAction.getInstance());
 	}
 
 }
