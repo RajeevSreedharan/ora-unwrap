@@ -29,14 +29,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -45,12 +43,12 @@ import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import in.net.rajeev.oraunwrap.core.ConnectionObservable;
-import in.net.rajeev.oraunwrap.core.DBConnections;
 import in.net.rajeev.oraunwrap.core.Unwrapper;
 import in.net.rajeev.oraunwrap.ui.commands.OpenActionObservable;
+import in.net.rajeev.oraunwrap.ui.commands.Savable;
+import in.net.rajeev.oraunwrap.ui.commands.SaveAsAction;
 
-public class PnlTextUnwrap extends JPanel {
+public class PnlTextUnwrap extends JPanel implements Savable {
 
 	private static final long serialVersionUID = 1L;
 	JTextArea txtInput;
@@ -172,6 +170,8 @@ public class PnlTextUnwrap extends JPanel {
 				readfile(selectedFile);
 			}
 		});
+		
+		SaveAsAction.getInstance().addSavable(this);
 	}
 	
 	private void readfile(final File selectedFile){
@@ -215,6 +215,10 @@ public class PnlTextUnwrap extends JPanel {
 		txtOutput.setText(unwrapped);
 		txtOutput.selectAll();
 		txtOutput.requestFocus();
+	}
+
+	public String getSavableText() {
+		return txtOutput.getText();
 	}
 
 }
