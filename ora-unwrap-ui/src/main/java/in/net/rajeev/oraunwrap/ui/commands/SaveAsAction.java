@@ -15,15 +15,14 @@
  */
 package in.net.rajeev.oraunwrap.ui.commands;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
+import javax.swing.text.JTextComponent;
 
 import in.net.rajeev.oraunwrap.ui.Main;
 
@@ -34,7 +33,6 @@ import in.net.rajeev.oraunwrap.ui.Main;
 public class SaveAsAction extends AbstractAction {
 
 	private static final long serialVersionUID = 1L;
-	ArrayList<Savable> savables = new ArrayList<Savable>();
 	private static SaveAsAction instance;
 
 	static {
@@ -50,42 +48,29 @@ public class SaveAsAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		Savable focussedSavable = null;
-		String savableText = ""; 
-		
-		for (Savable savable : savables) {
-			if (savable instanceof Component) {
-				Component comp = (Component) savable;
-				if (comp.isVisible()) {
-					focussedSavable = savable;
-					break;
-				}
-			}
-		}
+		JTextComponent focused = FocusedComponentAction.getInstance().getFocusedComponent2();
+		String savableText = focused != null ? focused.getText() : "";
 
-		savableText = focussedSavable.getSavableText();
-		
 		String lastSavedFolder = (String) Main.getProperties().get("last.saved.folder");
-		
+
 		JFileChooser chooser = new JFileChooser();
 		chooser.setCurrentDirectory(new File(lastSavedFolder));
 		int retrival = chooser.showSaveDialog(null);
-		
+
 		if (retrival == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = chooser.getSelectedFile();
 			FileWriter fw = null;
 			try {
-				fw = new FileWriter((selectedFile.getName().lastIndexOf(".") > 0
-						? selectedFile.getAbsolutePath()
+				fw = new FileWriter((selectedFile.getName().lastIndexOf(".") > 0 ? selectedFile.getAbsolutePath()
 						: selectedFile + ".sql"));
 				fw.write(savableText);
-				if(!selectedFile.getParent().equals(lastSavedFolder)) {
+				if (!selectedFile.getParent().equals(lastSavedFolder)) {
 					Main.updateProperty("last.saved.folder", selectedFile.getParent());
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			} finally {
-				if(fw != null)
+				if (fw != null)
 					try {
 						fw.close();
 					} catch (IOException e1) {
@@ -93,10 +78,6 @@ public class SaveAsAction extends AbstractAction {
 					}
 			}
 		}
-	}
-
-	public void addSavable(Savable savable) {
-		savables.add(savable);
 	}
 
 }
