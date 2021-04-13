@@ -37,11 +37,9 @@ import in.net.rajeev.oraunwrap.core.DBConnections;
 import in.net.rajeev.oraunwrap.core.DBSchemaUtil;
 import in.net.rajeev.oraunwrap.core.Unwrapper;
 import in.net.rajeev.oraunwrap.ui.commands.ConnectAction;
-import in.net.rajeev.oraunwrap.ui.commands.Savable;
-import in.net.rajeev.oraunwrap.ui.commands.SaveAsAction;
 import in.net.rajeev.oraunwrap.ui.helpers.AutoCompletion;
 
-public class PnlDBUnitUnwrap extends JPanel implements Savable {
+public class PnlDBUnitUnwrap extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -240,8 +238,6 @@ public class PnlDBUnitUnwrap extends JPanel implements Savable {
 				taOutput.setText(source);
 			}
 		});
-		
-		SaveAsAction.getInstance().addSavable(this);
 	}
 
 	/**
@@ -315,10 +311,6 @@ public class PnlDBUnitUnwrap extends JPanel implements Savable {
 		((DefaultMutableTreeNode) treeUnits.getModel().getRoot())
 				.setUserObject(conn.getSchema() + url.substring(url.indexOf("@")));
 		return map;
-	}
-
-	public String getSavableText() {
-		return taOutput.getText();
 	}
 
 }
