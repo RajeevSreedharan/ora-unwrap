@@ -17,12 +17,16 @@
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -31,9 +35,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.DefaultEditorKit;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -121,24 +129,42 @@ public class FrmUnwrapUI extends JFrame {
 		menuBar.add(mnHelpMenu);
 
 		mntmFileOpen = new JMenuItem(MessagesUI.getString("FrmUnwrapUI.openmenu"));
+		mntmFileOpen.setMnemonic(KeyEvent.VK_O);
+		mntmFileOpen.setAccelerator(KeyStroke.getKeyStroke('O', Toolkit.getDefaultToolkit ().getMenuShortcutKeyMask()));
 		mnFileMenu.add(mntmFileOpen);
 
 		mntmFileSaveas = new JMenuItem(MessagesUI.getString("FrmUnwrapUI.saveasmenu"));
+		mntmFileSaveas.setMnemonic(KeyEvent.VK_S);
+		mntmFileSaveas.setAccelerator(KeyStroke.getKeyStroke('S', Toolkit.getDefaultToolkit ().getMenuShortcutKeyMask()));
 		mnFileMenu.add(mntmFileSaveas);
 
 		mntmFileConnect = new JMenuItem(MessagesUI.getString("FrmUnwrapUI.connectaction"));
-		mnFileMenu.add(mntmFileConnect);
 		mntmFileConnect.setActionCommand(ConnectAction.CONNECT);
+		mntmFileConnect.setMnemonic(KeyEvent.VK_D);
+		mntmFileConnect.setAccelerator(KeyStroke.getKeyStroke('D', Toolkit.getDefaultToolkit ().getMenuShortcutKeyMask()));
+		mnFileMenu.add(mntmFileConnect);
 
 		mntmFileExit = new JMenuItem(MessagesUI.getString("FrmUnwrapUI.exitmenu"));
+		mntmFileExit.setMnemonic(KeyEvent.VK_E);
+		mntmFileExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, Toolkit.getDefaultToolkit ().getMenuShortcutKeyMask()));
 		mnFileMenu.add(mntmFileExit);
 
-		JMenuItem mntmEditCopy = new JMenuItem(MessagesUI.getString("FrmUnwrapUI.copymenu"));
+
+		JMenuItem mntmEditCopy = new JMenuItem();
 		mnEditMenu.add(mntmEditCopy);
+		mntmEditCopy.setAction(new DefaultEditorKit.CopyAction());
+		mntmEditCopy.setText(MessagesUI.getString("FrmUnwrapUI.copymenu"));
+		mntmEditCopy.setMnemonic(KeyEvent.VK_C);
+		mntmEditCopy.setAccelerator(KeyStroke.getKeyStroke('C', Toolkit.getDefaultToolkit ().getMenuShortcutKeyMask()));
 
-		JMenuItem mntmEditPaste = new JMenuItem(MessagesUI.getString("FrmUnwrapUI.pastemenu"));
+		JMenuItem mntmEditPaste = new JMenuItem();
 		mnEditMenu.add(mntmEditPaste);
+		mntmEditPaste.setAction(new DefaultEditorKit.PasteAction());
+		mntmEditPaste.setText(MessagesUI.getString("FrmUnwrapUI.pastemenu"));
+		mntmEditPaste.setMnemonic(KeyEvent.VK_V);
+		mntmEditPaste.setAccelerator(KeyStroke.getKeyStroke('V', Toolkit.getDefaultToolkit ().getMenuShortcutKeyMask()));
 
+		
 		JMenu mntmHelpLanguage = new JMenu(MessagesUI.getString("FrmUnwrapUI.languagemenu"));
 		mnHelpMenu.add(mntmHelpLanguage);
 
@@ -156,8 +182,17 @@ public class FrmUnwrapUI extends JFrame {
 		tabbedPane.addTab(MessagesUI.getString("FrmUnwrapUI.tabDBUnit.title"), null, pnlDBUnitUnwrap, MessagesUI.getString("FrmUnwrapUI.tabDBUnit.title"));
 		pnlSchemaUnwrap = new JPanel();
 		tabbedPane.addTab(MessagesUI.getString("FrmUnwrapUI.tabSchema.title"), null, pnlSchemaUnwrap, MessagesUI.getString("FrmUnwrapUI.tabSchema.title"));
+		
+		JToolBar trailing = new JToolBar();
+		trailing.setFloatable(false);
+		trailing.setBorder((Border) null);
+		trailing.add(Box.createHorizontalGlue());
+		trailing.add(new JButton("Connect"));
+		trailing.add(new JButton("Exceute"));
+		trailing.add(new JButton("Console"));
+		contentPane.add(tabbedPane);	
+		tabbedPane.putClientProperty("JTabbedPane.trailingComponent", trailing);
 
-		contentPane.add(tabbedPane);
 		
 		//****************** Actions and listeners ******************/
 		
