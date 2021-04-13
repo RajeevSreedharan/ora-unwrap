@@ -45,10 +45,8 @@ import javax.swing.event.DocumentListener;
 
 import in.net.rajeev.oraunwrap.core.Unwrapper;
 import in.net.rajeev.oraunwrap.ui.commands.OpenActionObservable;
-import in.net.rajeev.oraunwrap.ui.commands.Savable;
-import in.net.rajeev.oraunwrap.ui.commands.SaveAsAction;
 
-public class PnlTextUnwrap extends JPanel implements Savable {
+public class PnlTextUnwrap extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	JTextArea txtInput;
@@ -171,7 +169,6 @@ public class PnlTextUnwrap extends JPanel implements Savable {
 			}
 		});
 		
-		SaveAsAction.getInstance().addSavable(this);
 	}
 	
 	private void readfile(final File selectedFile){
@@ -215,10 +212,6 @@ public class PnlTextUnwrap extends JPanel implements Savable {
 		txtOutput.setText(unwrapped);
 		txtOutput.selectAll();
 		txtOutput.requestFocus();
-	}
-
-	public String getSavableText() {
-		return txtOutput.getText();
 	}
 
 }
