@@ -41,14 +41,14 @@ public class ConnectionObservable extends Observable {
 			if (!(DBConnections.getConnection() == null) && !DBConnections.getConnection().isClosed()) {
 				if (connected == false) {
 					connected = true;
-					connectionObservable.setChanged();
-					connectionObservable.notifyObservers();
+					setChanged();
+					notifyObservers();
 				}
 			} else {
 				if (connected == true) {
 					connected = false;
-					connectionObservable.setChanged();
-					connectionObservable.notifyObservers();
+					setChanged();
+					notifyObservers();
 				}
 			}
 		} catch (SQLException e) {
