@@ -15,6 +15,7 @@
  */
 package in.net.rajeev.oraunwrap.ui.commands;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileWriter;
@@ -34,6 +35,7 @@ public class SaveAsAction extends AbstractAction {
 
 	private static final long serialVersionUID = 1L;
 	private static SaveAsAction instance;
+	private Component parent;
 
 	static {
 		instance = new SaveAsAction();
@@ -46,6 +48,10 @@ public class SaveAsAction extends AbstractAction {
 	public static SaveAsAction getInstance() {
 		return instance;
 	}
+	
+	public void setParent(Component parent) {
+		this.parent = parent;
+	}
 
 	public void actionPerformed(ActionEvent e) {
 		JTextComponent focused = FocusedComponentAction.getInstance().getFocusedComponent2();
@@ -55,7 +61,8 @@ public class SaveAsAction extends AbstractAction {
 
 		JFileChooser chooser = new JFileChooser();
 		chooser.setCurrentDirectory(new File(lastSavedFolder));
-		int retrival = chooser.showSaveDialog(null);
+
+		int retrival = chooser.showSaveDialog(parent);
 
 		if (retrival == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = chooser.getSelectedFile();
