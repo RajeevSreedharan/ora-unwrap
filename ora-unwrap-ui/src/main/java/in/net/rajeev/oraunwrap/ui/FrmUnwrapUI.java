@@ -16,7 +16,6 @@
  package in.net.rajeev.oraunwrap.ui;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,7 +25,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import javax.swing.Box;
-import javax.swing.JButton;
+import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -35,16 +34,17 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultEditorKit;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.FlatLightLaf;
 
 import in.net.rajeev.oraunwrap.core.ConnectionObservable;
 import in.net.rajeev.oraunwrap.ui.commands.ConnectAction;
@@ -72,26 +72,13 @@ public class FrmUnwrapUI extends JFrame {
 	JMenuItem mntmFileExit;
 	JMenuItem mntmFileOpen;
 	JMenuItem mntmFileSaveas;
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		try {
-			UIManager.setLookAndFeel(new FlatLightLaf());
-		} catch (Exception ex) {
-			System.err.println(MessagesUI.getString("FrmUnwrapUI.lafinitfailed"));
-		}
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					FrmUnwrapUI frame = new FrmUnwrapUI();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+	
+	JToggleButton toolbarConnection;
+
+	private JToggleButton toolbarConsole;
+	
+	private static final ImageIcon iconDisconnected = UnwrapperIconSet.getIcon(UnwrapperIconSet.ICON_NETWORK_DISCONNECTED);
+	private static final ImageIcon iconConnected = UnwrapperIconSet.getIcon(UnwrapperIconSet.ICON_NETWORK_CONNECTED);
 
 	/**
 	 * Create the frame.
@@ -149,7 +136,6 @@ public class FrmUnwrapUI extends JFrame {
 		mntmFileExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, Toolkit.getDefaultToolkit ().getMenuShortcutKeyMask()));
 		mnFileMenu.add(mntmFileExit);
 
-
 		JMenuItem mntmEditCopy = new JMenuItem();
 		mnEditMenu.add(mntmEditCopy);
 		mntmEditCopy.setAction(new DefaultEditorKit.CopyAction());
@@ -163,7 +149,6 @@ public class FrmUnwrapUI extends JFrame {
 		mntmEditPaste.setText(MessagesUI.getString("FrmUnwrapUI.pastemenu"));
 		mntmEditPaste.setMnemonic(KeyEvent.VK_V);
 		mntmEditPaste.setAccelerator(KeyStroke.getKeyStroke('V', Toolkit.getDefaultToolkit ().getMenuShortcutKeyMask()));
-
 		
 		JMenu mntmHelpLanguage = new JMenu(MessagesUI.getString("FrmUnwrapUI.languagemenu"));
 		mnHelpMenu.add(mntmHelpLanguage);
@@ -187,15 +172,18 @@ public class FrmUnwrapUI extends JFrame {
 		trailing.setFloatable(false);
 		trailing.setBorder((Border) null);
 		trailing.add(Box.createHorizontalGlue());
-		trailing.add(new JButton("Connect"));
-		trailing.add(new JButton("Exceute"));
-		trailing.add(new JButton("Console"));
+		toolbarConnection = new JToggleButton(iconDisconnected);
+		toolbarConnection.setSelectedIcon(iconConnected);
+		toolbarConnection.setToolTipText(MessagesUI.getString("FrmUnwrapUI.connectaction"));
+		trailing.add(toolbarConnection);
+		toolbarConsole = new JToggleButton(UnwrapperIconSet.getIcon(UnwrapperIconSet.ICON_CONSOLE));
+		trailing.add(toolbarConsole);
+		toolbarConsole.setToolTipText(MessagesUI.getString("FrmUnwrapUI.console"));
+
 		contentPane.add(tabbedPane);	
 		tabbedPane.putClientProperty("JTabbedPane.trailingComponent", trailing);
-
 		
 		//****************** Actions and listeners ******************/
-		
 		SwingUtilities.invokeLater(new Runnable() {
 		    public void run() {
 		    	addListenersAndActions();
@@ -217,8 +205,19 @@ public class FrmUnwrapUI extends JFrame {
 			}
 		});
 		
-		mntmFileConnect.addActionListener(new ConnectAction());
-
+		ConnectAction connectAction = new ConnectAction();
+		mntmFileConnect.addActionListener(connectAction);
+		toolbarConnection.addActionListener(connectAction);
+		toolbarConnection.getModel().addChangeListener(new ChangeListener() {
+	        public void stateChanged(ChangeEvent evt) {
+	           if (ConnectionObservable.getInstance().checkConnection()) {
+					toolbarConnection.setSelected(true);
+	           } else {
+					toolbarConnection.setSelected(false);
+	           }
+	        }
+	     });
+		
 		mntmFileExit.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
@@ -242,9 +241,13 @@ public class FrmUnwrapUI extends JFrame {
 					mntmFileConnect.setActionCommand(ConnectAction.DISCONNECT);
 					if(tabbedPane.getComponentAt(tabbedPane.getSelectedIndex()).equals(pnlTextUnwrap))
 						tabbedPane.setSelectedComponent(pnlDBUnitUnwrap);
+					toolbarConnection.setSelected(true);
+					toolbarConnection.setToolTipText(MessagesUI.getString("FrmUnwrapUI.disconnectaction"));
 				} else {
 					mntmFileConnect.setText(MessagesUI.getString("FrmUnwrapUI.connectaction"));
 					mntmFileConnect.setActionCommand(ConnectAction.CONNECT);
+					toolbarConnection.setSelected(false);
+					toolbarConnection.setToolTipText(MessagesUI.getString("FrmUnwrapUI.connectaction"));
 				}
 			}
 		});
@@ -254,8 +257,9 @@ public class FrmUnwrapUI extends JFrame {
 				tabbedPane.setSelectedComponent(pnlTextUnwrap);
 			}
 		});
-		
+
 		mntmFileSaveas.addActionListener(SaveAsAction.getInstance());
+		SaveAsAction.getInstance().setParent(FrmUnwrapUI.this);
 	}
 
 }
