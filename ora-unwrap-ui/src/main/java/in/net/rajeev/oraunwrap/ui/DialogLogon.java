@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package in.net.rajeev.oraunwrap.ui;
+package in.net.rajeev.oraunwrap.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -24,6 +24,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -47,18 +48,18 @@ import in.net.rajeev.oraunwrap.ui.helpers.UnwrapperIconSet;
  *
  */
 public class DialogLogon extends JDialog {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	private static DialogLogon instance = new DialogLogon();
 	private SwingWorker<Object, Void> worker = null;
-	
+
 	public static DialogLogon getInstance() {
-		if(instance == null)
+		if (instance == null)
 			instance = new DialogLogon();
 		return instance;
 	}
-	
+
 	private final JPanel contentPanel = new JPanel();
 	private JTextField tfUser;
 	private JPasswordField tfPassword;
@@ -66,6 +67,7 @@ public class DialogLogon extends JDialog {
 	private JTextField tfPort;
 	private JTextField tfService;
 	private JProgressBar progressBar;
+
 	/**
 	 * Create the dialog.
 	 */
@@ -76,15 +78,15 @@ public class DialogLogon extends JDialog {
 		setIconImage(UnwrapperIconSet.getMainIcon());
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-		
+
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_contentPanel = new GridBagLayout();
-		gbl_contentPanel.columnWidths = new int[]{0, 0, 0, 0, 0};
-		gbl_contentPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_contentPanel.columnWeights = new double[]{0.1, 0.4, 0.0, 1.0, 0.2};
-		gbl_contentPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+		gbl_contentPanel.columnWidths = new int[] { 0, 0, 0, 0, 0 };
+		gbl_contentPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_contentPanel.columnWeights = new double[] { 0.1, 0.4, 0.0, 1.0, 0.2 };
+		gbl_contentPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 		contentPanel.setLayout(gbl_contentPanel);
 		{
 			JLabel lblUser = new JLabel("User");
@@ -202,13 +204,13 @@ public class DialogLogon extends JDialog {
 				buttonPane.add(okButton);
 				getRootPane().setDefaultButton(okButton);
 				okButton.addActionListener(new ActionListener() {
-					
+
 					public void actionPerformed(ActionEvent e) {
 						progressBar.setVisible(true);
 						progressBar.setIndeterminate(true);
-						if(worker == null || !worker.getState().equals(SwingWorker.StateValue.STARTED))
+						if (worker == null || !worker.getState().equals(SwingWorker.StateValue.STARTED))
 							connect();
-						
+
 					}
 				});
 			}
@@ -217,10 +219,10 @@ public class DialogLogon extends JDialog {
 				cancelButton.setActionCommand("Cancel");
 				buttonPane.add(cancelButton);
 				cancelButton.addActionListener(new ActionListener() {
-					
+
 					public void actionPerformed(ActionEvent e) {
 						DialogLogon.this.setVisible(false);
-						if(worker !=null && worker.getState().equals(SwingWorker.StateValue.STARTED)) {
+						if (worker != null && worker.getState().equals(SwingWorker.StateValue.STARTED)) {
 							worker.cancel(true);
 							progressBar.setVisible(false);
 							progressBar.setIndeterminate(false);
@@ -228,50 +230,65 @@ public class DialogLogon extends JDialog {
 					}
 				});
 			}
-		}	
+		}
+		
+		if(Main.getProperties().get("logon.last.host") != null)
+			tfHost.setText((String) Main.getProperties().get("logon.last.host"));
+		if(Main.getProperties().get("logon.last.service") != null)
+			tfService.setText((String) Main.getProperties().get("logon.last.service"));
+		if(Main.getProperties().get("logon.last.port") != null)
+			tfPort.setText((String) Main.getProperties().get("logon.last.port"));
+		if(Main.getProperties().get("logon.last.user") != null)
+			tfUser.setText((String) Main.getProperties().get("logon.last.user"));
 		
 		addEscapeListener(this);
 	}
-	
-	public void addEscapeListener(final JDialog dialog) {
-	    ActionListener escListener = new ActionListener() {
-	        public void actionPerformed(ActionEvent e) {
-	            dialog.setVisible(false);
-	        }
-	    };
 
-	    dialog.getRootPane().registerKeyboardAction(escListener,
-	            KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-	            JComponent.WHEN_IN_FOCUSED_WINDOW);
+	public void addEscapeListener(final JDialog dialog) {
+		ActionListener escListener = new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dialog.setVisible(false);
+			}
+		};
+
+		dialog.getRootPane().registerKeyboardAction(escListener, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+				JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 	}
-	
-	private void connect(){
+
+	private void connect() {
 		worker = new SwingWorker<Object, Void>() {
-		@Override
-		public Object doInBackground() {
-			boolean connected = false;
-			try {
-				DBConnections.connect(tfHost.getText(), tfService.getText(), tfPort.getText(), tfUser.getText(), tfPassword.getText());
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-				JOptionPane.showMessageDialog(DialogLogon.this, e1.getMessage(),
-						"Could not connect", JOptionPane.ERROR_MESSAGE);
+			@Override
+			public Object doInBackground() {
+				boolean connected = false;
+				try {
+					DBConnections.connect(tfHost.getText(), tfService.getText(), tfPort.getText(), tfUser.getText(),
+							tfPassword.getText());
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+					JOptionPane.showMessageDialog(DialogLogon.this, e1.getMessage(), "Could not connect",
+							JOptionPane.ERROR_MESSAGE);
+				}
+				Properties props = new Properties();
+				props.setProperty("logon.last.host", tfHost.getText());
+				props.setProperty("logon.last.service", tfService.getText());
+				props.setProperty("logon.last.port", tfPort.getText());
+				props.setProperty("logon.last.user", tfUser.getText());
+				Main.updateProperties(props);
+				return connected;
 			}
-			return connected;
-		}
-		
-		@Override
-		public void done() {
-			progressBar.setVisible(false);
-			progressBar.setIndeterminate(false);
-			worker = null;
-			ConnectionObservable.getInstance().checkConnection();
-			DialogLogon.this.setVisible(false);
-		}
-	};
-	
-	worker.execute();
+
+			@Override
+			public void done() {
+				progressBar.setVisible(false);
+				progressBar.setIndeterminate(false);
+				worker = null;
+				ConnectionObservable.getInstance().checkConnection();
+				DialogLogon.this.setVisible(false);
+			}
+		};
+
+		worker.execute();
 	}
 
 }
